@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="OTF — onythefamily Management Dashboard">
+  <title>OTF — จัดการสมาชิก & ตั้งค่า</title>
+  <link rel="icon" type="image/png" href="otf-logo.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="otf-logo.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .admin-main {
+      padding: 40px 0 100px;
+    }
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .admin-header h1 {
+      font-family: var(--font-serif);
+      font-size: 36px;
+      color: #fff;
+    }
+    .admin-header-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .admin-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 30px;
+      overflow-x: auto;
+    }
+    .admin-tab {
+      padding: 12px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .admin-tab:hover {
+      color: #fff;
+    }
+    .admin-tab.active {
+      color: #ffffff;
+      border-bottom-color: #ffffff;
+    }
+    .admin-table-wrap {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      overflow-x: auto;
+    }
+    table.admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+    }
+    table.admin-table th {
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--line);
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+    }
+    table.admin-table td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+    table.admin-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .member-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .member-cell img {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: #19191e;
+      border: 1px solid var(--line);
+    }
+    .action-btn-group {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-edit, .btn-del {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      transition: 0.18s ease;
+    }
+    .btn-edit {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+    }
+    .btn-edit:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+    .btn-del {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: #f87171;
+    }
+    .btn-del:hover {
+      background: rgba(239, 68, 68, 0.22);
+    }
+    /* Form Modal */
+    .form-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 400;
+      background: rgba(5, 5, 8, 0.82);
+      backdrop-filter: blur(10px);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+    }
+    .form-modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .form-modal {
+      width: min(640px, 100%);
+      max-height: 90vh;
+      background: #131317;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-xl);
+      padding: 30px;
+      overflow-y: auto;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+    }
+    .form-modal h2 {
+      font-family: var(--font-serif);
+      font-size: 24px;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .form-control {
+      width: 100%;
+      height: 44px;
+      background: #1b1b22;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0 14px;
+      color: #fff;
+      font-size: 13.5px;
+      outline: none;
+    }
+    .form-control:focus {
+      border-color: rgba(212, 175, 55, 0.5);
+    }
+    textarea.form-control {
+      height: 80px;
+      padding: 10px 14px;
+      resize: vertical;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    /* Settings panel */
+    .settings-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+    .settings-card h3 {
+      font-size: 18px;
+      color: #eee8dc;
+      margin-bottom: 16px;
+    }
+
+    /* Auth Gate Lock Screen */
+    .auth-gate-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #040405;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+    .auth-gate-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .auth-gate-card {
+      width: min(440px, 100%);
+      background: #0d0d10;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-xl);
+      padding: 38px 30px;
+      text-align: center;
+      box-shadow: 0 35px 95px rgba(0, 0, 0, 0.85);
+      position: relative;
+    }
+    .auth-gate-badge {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.08);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-serif);
+      font-size: 24px;
+      font-weight: 800;
+      color: #ffffff;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.15);
+    }
+    .auth-gate-card h2 {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      color: #ffffff;
+      letter-spacing: 0.08em;
+    }
+    .auth-gate-sub {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin: 8px 0 24px;
+    }
+    .auth-error-msg {
+      margin: 12px 0 6px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      font-size: 12px;
+      animation: shake 0.3s ease-in-out;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+  </style>
+</head>
+<body class="admin-page">
+
+  <!-- Security Gate / Login Screen -->
+  <div class="auth-gate-overlay" id="authGateOverlay">
+    <div class="auth-gate-card">
+      <div class="auth-gate-badge">
+        <img src="otf-logo.png" alt="OTF" style="width: 80%; height: 80%; object-fit: contain;">
+      </div>
+      <h2>MANAGEMENT PORTAL</h2>
+      <p class="auth-gate-sub">พื้นที่เฉพาะผู้ดูแลและหัวหน้ากลุ่ม OTF (onythefamily)</p>
+
+      <form id="authGateForm">
+        <div class="form-group" style="text-align: left;">
+          <label for="adminPinInput">รหัสผ่านความปลอดภัย (SECURITY PIN)</label>
+          <input type="password" id="adminPinInput" class="form-control" placeholder="" autocomplete="current-password" autofocus required>
+        </div>
+
+        <div id="authErrorMsg" class="auth-error-msg" hidden>
+          ⚠️ รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง
+        </div>
+
+        <button type="submit" class="primary-button" style="width: 100%; justify-content: center; margin-top: 14px;">
+          ปลดล็อกเข้าสู่ระบบ <span>→</span>
+        </button>
+
+        <div style="margin-top: 20px;">
+          <a href="index.html" style="font-size: 12.5px; color: var(--text-muted); text-decoration: underline;">
+            ← กลับสู่หน้าแรกของกลุ่ม
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="site-backdrop" aria-hidden="true"></div>
+  <canvas id="weatherCanvas"></canvas>
+
+  <header class="topbar shell">
+    <a class="brand" href="index.html">
+      <div class="brand-box"><img src="otf-logo.png" alt="OTF"></div>
+      <div class="brand-text">
+        <span class="brand-word">OTF</span>
+        <span class="brand-sub">Management CMS</span>
+      </div>
+    </a>
+
+    <nav class="nav">
+      <a href="members.html" style="color: var(--text-muted);">← ดูหน้ารายชื่อสมาชิก</a>
+      <button id="btnLogoutAdmin" class="btn-del" type="button" style="display: inline-flex; align-items: center; gap: 6px;">
+        🔒 ออกจากระบบ
+      </button>
+    </nav>
+  </header>
+
+  <main class="admin-main shell">
+    <div class="admin-header">
+      <div>
+        <div class="minimal-kicker">CONTROL CENTER</div>
+        <h1>จัดการข้อมูล OTF</h1>
+      </div>
+      <div class="admin-header-actions">
+        <button class="primary-button" id="btnAddMember" type="button">
+          + เพิ่มสมาชิกใหม่
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="members">รายชื่อสมาชิก (<span id="tabCount">0</span>)</button>
+      <button class="admin-tab" data-tab="music">🎵 จัดการเพลง (Playlist)</button>
+      <button class="admin-tab" data-tab="settings">ตั้งค่าเว็บไซต์ & บรรยากาศ</button>
+      <button class="admin-tab" data-tab="backup">สำรองข้อมูล & นำเข้า (JSON)</button>
+    </div>
+
+    <!-- TAB 1: MEMBERS LIST -->
+    <section id="sectionMembers" class="tab-content">
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>สมาชิก</th>
+              <th>ยศ / ระดับ</th>
+              <th>ตำแหน่ง / ฉายา</th>
+              <th>สถานะ</th>
+              <th>ช่องทางติดต่อ</th>
+              <th style="text-align: right;">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB: MUSIC PLAYLIST MANAGEMENT -->
+    <section id="sectionMusic" class="tab-content" hidden>
+      <div class="settings-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h3 style="margin-bottom: 4px;">🎵 จัดการเพลงประจำตระกูล OTF (<span id="trackCountLabel">0</span>)</h3>
+            <p style="color: var(--text-muted); font-size: 13.5px;">
+              เพลงจะเล่นอัตโนมัติเมื่อเปิดเข้าเว็บ และแผ่นเสียงโลโก้ OTF ที่เครื่องเล่นเพลงด้านซ้ายล่างจะหมุนต่อเนื่อง
+            </p>
+          </div>
+        </div>
+
+        <!-- Add New Music Track Form -->
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line-strong); border-radius: var(--radius-md); padding: 22px; margin-bottom: 24px;">
+          <h4 style="color: #ffffff; font-size: 15px; margin-bottom: 16px; font-weight: 700;">+ เพิ่มเพลงใหม่เข้าเพลย์ลิสต์ (Add MP3 Track)</h4>
+          
+          <!-- Method 1: Local File Upload -->
+          <div style="padding: 16px; border: 1px dashed rgba(255, 255, 255, 0.25); border-radius: 12px; background: rgba(255, 255, 255, 0.02); margin-bottom: 22px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <strong style="color: #ffffff; font-size: 14px; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                  📁 วิธีที่ 1: เลือกไฟล์ MP3 จากในเครื่องของคุณ (แนะนำที่สุด • เล่นได้ชัวร์ 100%)
+                </strong>
+                <p style="color: var(--text-muted); font-size: 12px; margin: 0;">
+                  เลือกไฟล์เพลง MP3 จากโฟลเดอร์ในเครื่อง (เช่น King Von หรือเพลงที่คุณตัดต่อไว้) เพื่อนำเข้าเล่นบนเว็บทันที
+                </p>
+              </div>
+              <label class="primary-button" style="cursor: pointer; margin: 0; padding: 10px 18px; font-size: 13px;">
+                <span>📂 เลือกไฟล์ MP3 จากเครื่อง</span>
+                <input type="file" id="localAudioFileInput" accept="audio/mp3,audio/mpeg,audio/wav,audio/*" style="display: none;">
+              </label>
+            </div>
+            <div id="localUploadNotice" style="margin-top: 10px; font-size: 12px; color: #4ade80;" hidden>
+              ✓ อัปโหลดสำเร็จ: <span id="localUploadFileName"></span>
+            </div>
+          </div>
+
+          <!-- Method 2: Online Direct URL -->
+          <div>
+            <strong style="color: #ffffff; font-size: 14px; display: block; margin-bottom: 12px;">
+              🌐 วิธีที่ 2: วางลิงก์ไฟล์เสียง MP3 ตรง (Direct MP3 URL)
+            </strong>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="newTrackTitle">ชื่อเพลง (Song Title)</label>
+                <input class="form-control" id="newTrackTitle" placeholder="เช่น Took Her to the O">
+              </div>
+              <div class="form-group">
+                <label for="newTrackArtist">ชื่อศิลปิน / สังกัด (Artist)</label>
+                <input class="form-control" id="newTrackArtist" placeholder="เช่น King Von">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="newTrackUrl">ลิงก์ไฟล์เสียง MP3 โดยตรง (Direct MP3 URL)</label>
+              <input class="form-control" id="newTrackUrl" placeholder="https://domain.com/song.mp3 หรือ king-von-took-her-to-the-o.mp3">
+              <small style="color: var(--text-dim); font-size: 11.5px; margin-top: 5px; display: block;">
+                ⚠️ <strong>ข้อควรทราบ:</strong> ลิงก์ต้องเป็น direct audio file (.mp3) ห้ามคัดลอกลิงก์หน้าเว็บ เช่น <code>pixabay.com/music/...</code> เพราะเบราว์เซอร์เปิดหน้าเว็บเป็นเพลงไม่ได้ (ถ้าใช้เว็บ Pixabay ให้คลิกขวาที่ปุ่ม <strong>Download</strong> สีเขียว แล้วเลือก <strong>"Copy link address"</strong>)
+              </small>
+            </div>
+
+            <div id="urlWarningMsg" style="padding: 12px 14px; border-radius: 8px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; font-size: 12.5px; margin-bottom: 14px;" hidden>
+              ⚠️ <strong>ลิงก์ไม่ถูกต้อง:</strong> คุณวางลิงก์หน้าเว็บ HTML ไม่ใช่ไฟล์เสียง (.mp3) กรุณาใช้ปุ่ม <strong>"เลือกไฟล์ MP3 จากเครื่อง"</strong> ด้านบน หรือคลิกขวาที่ปุ่ม Download เพื่อคัดลอกลิงก์ MP3 ตรงครับ
+            </div>
+
+            <button class="primary-button" id="btnAddTrack" type="button" style="margin-top: 4px;">
+              + บันทึกเพิ่มเพลงนี้เข้าสู่เพลย์ลิสต์
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Preset Beats -->
+        <div style="margin-bottom: 24px; padding: 18px; border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--line);">
+          <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em;">
+            ⚡ เพลงตัวอย่างแนวแก๊ง FiveM / Clan Beats (คลิกเพื่อเพิ่มทันที):
+          </label>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-edit" type="button" id="presetBeat1">🎧 Drill Beat (Trap/Dark)</button>
+            <button class="btn-edit" type="button" id="presetBeat2">🎧 Midnight Bass (Future Bass)</button>
+            <button class="btn-edit" type="button" id="presetBeat3">🎧 Phonk Shadow (Fast Energy)</button>
+          </div>
+        </div>
+
+        <!-- Current Tracks Table -->
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th style="width: 50px;">ลำดับ</th>
+                <th>ข้อมูลเพลง</th>
+                <th>ทดลองฟัง (Preview)</th>
+                <th>สถานะเพลง</th>
+                <th style="text-align: right;">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="trackListBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: SETTINGS -->
+    <section id="sectionSettings" class="tab-content" hidden>
+      <div class="settings-card">
+        <h3>ข้อความและข้อมูลครอบครัว OTF</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>ชื่อตัวย่อ (Short Name)</label>
+            <input class="form-control" id="setShortName" value="OTF">
+          </div>
+          <div class="form-group">
+            <label>ชื่อเต็ม (Full Name)</label>
+            <input class="form-control" id="setFullName" value="onythefamily">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>คำขวัญหลัก (Main Motto)</label>
+            <input class="form-control" id="setMotto" value="LOYALTY OVER ROYALTY">
+          </div>
+          <div class="form-group">
+            <label>คำขวัญรอง (Sub Motto)</label>
+            <input class="form-control" id="setSubMotto" value="FAMILY FIRST • RESPECT EARNED • NEVER DIVIDED">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>ข้อความแนะนำหน้าแรก (Hero Description)</label>
+          <textarea class="form-control" id="setHeroDesc"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>เอฟเฟกต์บรรยากาศ (Weather Effect)</label>
+            <select class="form-control" id="setWeather">
+              <option value="embers">ละอองประกายสีขาว (Monochrome Stardust) [แนะนำ]</option>
+              <option value="snow">หิมะโปรย (Snowfall)</option>
+              <option value="off">ปิดเอฟเฟกต์ (Off)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>เพลงพื้นหลัง (Background Music MP3 URL)</label>
+            <input class="form-control" id="setMusicUrl" placeholder="https://.../music.mp3">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>เปลี่ยนรหัสความปลอดภัยเข้าสู่ระบบหลังบ้าน (Admin PIN)</label>
+          <input class="form-control" id="setAdminPin" type="password" placeholder="เช่น 1688">
+          <small style="color: var(--text-dim); font-size: 11px; margin-top: 4px; display: block;">* รหัสเริ่มต้นคือ 1688 สามารถเปลี่ยนเป็นรหัสลับของคุณได้</small>
+        </div>
+
+        <button class="primary-button" id="btnSaveSettings" type="button" style="margin-top: 10px;">
+          บันทึกการตั้งค่า
+        </button>
+      </div>
+
+      <!-- Cloud Database Sync Card (Firebase Firestore) -->
+      <div class="settings-card" style="border: 1px solid rgba(255, 255, 255, 0.25); margin-top: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h3 style="margin-bottom: 4px;">🔥 เชื่อมต่อ Cloud Database (Firebase Firestore แบบ Tataros168)</h3>
+            <p style="color: var(--text-muted); font-size: 13px;">
+              เมื่อเชื่อมต่อ Firebase แล้ว แก้ไขข้อมูลในหน้าแอดมินตอนไหน เว็บหลักบน Vercel จะอัปเดตแบบเรียลไทม์ทันทีทั่วโลก
+            </p>
+          </div>
+          <span id="firebaseStatusBadge" class="card-role-pill" style="border-color: #facc15; color: #facc15;">
+            🟡 โหมด LocalStorage
+          </span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Firebase API Key</label>
+            <input class="form-control" id="fbApiKey" placeholder="AIzaSy...">
+          </div>
+          <div class="form-group">
+            <label>Firebase Project ID</label>
+            <input class="form-control" id="fbProjectId" placeholder="เช่น otf-onythefamily">
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px;">
+          <button class="btn-edit" id="btnSaveFirebaseConfig" type="button" style="padding: 10px 18px;">
+            💾 บันทึกการเชื่อมต่อ Firebase
+          </button>
+          <button class="primary-button" id="btnPushToFirebase" type="button" style="padding: 10px 18px; font-size: 13.5px;">
+            🚀 ซิงค์รายชื่อทั้งหมดขึ้น Cloud ทันที
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: BACKUP / RESTORE -->
+    <section id="sectionBackup" class="tab-content" hidden>
+      <!-- Vercel Direct Code Export Card -->
+      <div class="settings-card" style="border: 1px solid rgba(255, 255, 255, 0.35); background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+          <div>
+            <div class="card-role-pill" style="border-color: #4ade80; color: #4ade80; background: rgba(34, 197, 94, 0.1); margin-bottom: 8px;">
+              ⚡ อัปเดตขึ้น VERCEL ทันที (ไม่ต้องใช้ดาต้าเบส)
+            </div>
+            <h3 style="margin-bottom: 6px;">ส่งออกไฟล์ members-data.js สำหรับ Vercel</h3>
+            <p style="color: var(--text-muted); font-size: 13.5px; max-width: 650px; line-height: 1.6; margin-bottom: 14px;">
+              เนื่องจากเว็บไซต์บน Vercel เป็นเว็บแบบ Static การแก้ไขข้อมูลในเบราว์เซอร์จะไม่เปลี่ยนโค้ดบน Vercel โดยอัตโนมัติ<br>
+              <strong>วิธีที่ง่ายที่สุด:</strong> กดปุ่มด้านล่างเพื่อดาวน์โหลดไฟล์ <code>members-data.js</code> ที่มีข้อมูลสมาชิกล่าสุดของคุณ แล้วนำไปแทนที่ไฟล์เดิมบน Vercel/GitHub ได้ทันที 100%!
+            </p>
+          </div>
+          <button class="primary-button" id="btnDownloadVercelData" type="button" style="padding: 12px 24px; font-size: 14px;">
+            📥 ดาวน์โหลด members-data.js (อัปขึ้น Vercel)
+          </button>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <h3>ส่งออกข้อมูล (Export Backup)</h3>
+        <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 16px;">
+          ดาวน์โหลดไฟล์ JSON ของรายชื่อสมาชิกทั้งหมดและการตั้งค่าเพื่อเก็บสำรองไว้ หรือนำไปย้ายเครื่อง
+        </p>
+        <button class="primary-button" id="btnExportJSON" type="button">
+          📥 ดาวน์โหลดไฟล์ JSON สำรองข้อมูล
+        </button>
+      </div>
+
+      <div class="settings-card">
+        <h3>นำเข้าข้อมูล (Import JSON)</h3>
+        <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 16px;">
+          วางโค้ด JSON เพื่อกู้คืนรายชื่อสมาชิกและข้อมูลทันที
+        </p>
+        <textarea class="form-control" id="importJsonText" style="height: 120px; font-family: monospace; font-size: 12px;" placeholder='วาง JSON ที่นี่...'></textarea>
+        <button class="secondary-button" id="btnImportJSON" type="button" style="margin-top: 14px;">
+          📤 นำเข้าข้อมูลจาก JSON
+        </button>
+      </div>
+
+      <div class="settings-card" style="border-color: rgba(239, 68, 68, 0.3);">
+        <h3 style="color: #f87171;">คืนค่าเริ่มต้น (Reset to Default)</h3>
+        <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 16px;">
+          รีเซ็ตรายชื่อสมาชิกกลับเป็นชุดข้อมูลมาตรฐานของ OTF (onythefamily)
+        </p>
+        <button class="btn-del" id="btnResetDefault" type="button" style="padding: 10px 18px;">
+          ⚠️ รีเซ็ตข้อมูลกลับเป็นค่าเริ่มต้น
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add / Edit Member Modal Form -->
+  <div class="form-modal-overlay" id="formModalOverlay">
+    <div class="form-modal">
+      <h2 id="modalFormTitle">เพิ่มสมาชิกใหม่</h2>
+      <form id="memberForm">
+        <input type="hidden" id="editMemberId">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>ชื่อสมาชิก (เช่น OTF • ZERO) *</label>
+            <input class="form-control" id="formName" required placeholder="OTF • NICKNAME">
+          </div>
+          <div class="form-group">
+            <label>ระดับ / ยศ (Rank) *</label>
+            <select class="form-control" id="formRole">
+              <option value="owner">OWNER (ผู้นำสูงสุด)</option>
+              <option value="core">LEADER (หัวหน้า / แกนนำ)</option>
+              <option value="bigsupport">BIGSUPPORT (ผู้สนับสนุนหลัก)</option>
+              <option value="member" selected>MEMBERS (สมาชิกทั่วไป)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>ชื่อตำแหน่งเฉพาะ (Custom Role Title)</label>
+            <input class="form-control" id="formCustomTitle" placeholder="เช่น HEAD COMMANDER, MAIN GUNNER">
+          </div>
+          <div class="form-group">
+            <label>ฉายา / ตัวย่อ (Alias)</label>
+            <input class="form-control" id="formAlias" placeholder="เช่น ZERO, VDL, KZ">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>URL รูปโปรไฟล์ (Avatar URL)</label>
+          <input class="form-control" id="formAvatar" placeholder="https://images.unsplash.com/...">
+          <div style="margin-top: 6px; display: flex; gap: 8px;">
+            <button type="button" class="btn-edit" onclick="setSampleAvatar(1)">รูปผู้ชาย 1</button>
+            <button type="button" class="btn-edit" onclick="setSampleAvatar(2)">รูปผู้ชาย 2</button>
+            <button type="button" class="btn-edit" onclick="setSampleAvatar(3)">รูปผู้หญิง 1</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>URL ภาพแบนเนอร์ (Cover Banner URL)</label>
+          <input class="form-control" id="formCover" placeholder="https://images.unsplash.com/...">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>สถานะ (Status)</label>
+            <select class="form-control" id="formStatus">
+              <option value="online">ONLINE</option>
+              <option value="away">AWAY</option>
+              <option value="dnd">DND (ห้ามรบกวน)</option>
+              <option value="offline">OFFLINE</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>วันที่เข้าร่วม (Join Date)</label>
+            <input class="form-control" type="date" id="formJoinDate">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>คำคมประจำตัว (Quote)</label>
+          <input class="form-control" id="formQuote" placeholder="คำคมสั้นๆ เท่ๆ">
+        </div>
+
+        <div class="form-group">
+          <label>ประวัติ / รายละเอียด (Bio)</label>
+          <textarea class="form-control" id="formBio" placeholder="หน้าที่และความรับผิดชอบในครอบครัว OTF"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Discord Tag</label>
+            <input class="form-control" id="formDiscord" placeholder="username#0000">
+          </div>
+          <div class="form-group">
+            <label>Facebook Profile Link</label>
+            <input class="form-control" id="formFacebook" placeholder="https://facebook.com/...">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="secondary-button" id="btnCancelForm">ยกเลิก</button>
+          <button type="submit" class="primary-button">บันทึกข้อมูล</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="members-data.js"></script>
+  <script src="admin.js"></script>
+  <script src="ui-effects.js"></script>
+  <script>
+    function setSampleAvatar(type) {
+      const input = document.getElementById('formAvatar');
+      if (type === 1) input.value = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80";
+      if (type === 2) input.value = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80";
+      if (type === 3) input.value = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80";
+    }
+  </script>
+</body>
+</html>
