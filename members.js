@@ -28,11 +28,12 @@
   const supportCountEl = document.getElementById('supportCount');
   const memberCountEl = document.getElementById('memberCount');
 
-  // Badge Counters
-  const badgeOwner = document.getElementById('badgeOwner');
-  const badgeCore = document.getElementById('badgeCore');
-  const badgeSupport = document.getElementById('badgeSupport');
-  const badgeMember = document.getElementById('badgeMember');
+// Badge Counters
+const badgeOwner = document.querySelector('#badgeOwner');
+const badgeCore = document.querySelector('#badgeCore');
+const badgeSupport = document.querySelector('#badgeSupport');
+const badgeMember = document.querySelector('#badgeMember');
+
 
   // Modal Elements
   const profileOverlay = document.getElementById('profileOverlay');
