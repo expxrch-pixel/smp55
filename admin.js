@@ -481,6 +481,13 @@
   const btnSaveFirebaseConfig = document.getElementById('btnSaveFirebaseConfig');
   const firebaseStatusBadge = document.getElementById('firebaseStatusBadge');
 
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCTSWshAdCJFclG1ipfsobE2UlTwUdDnzs",    // <--- เราจะเอากุญแจมาใส่ตรงนี้
+  authDomain: "...",
+  projectId: "smp55-main" // <--- และตรงนี้
+};
+
   function updateFirebaseUI() {
     const isConn = window.OTF_DATA && window.OTF_DATA.isFirebaseConnected && window.OTF_DATA.isFirebaseConnected();
     if (firebaseStatusBadge) {
