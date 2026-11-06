@@ -4,6 +4,11 @@
  * Exported at: 2026-11-03T16:54:27.132Z
  */
 
+window.OTF_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCTSWshAdCJFclG1ipfsobE2UlTwUdDnzs",
+  projectId: "smp55-main"
+};
+
 const OTF_STORAGE_KEYS = {
   MEMBERS: 'otf_members_v2',
   SETTINGS: 'otf_settings_v2',
